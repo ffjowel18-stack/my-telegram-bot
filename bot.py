@@ -2,12 +2,19 @@ import os
 import json
 import random
 import aiohttp
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# =====================
+from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    ContextTypes,
+)
+
+# =========================
 # ENV
-# =====================
+# =========================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_KEY = os.getenv("API_KEY")
 
@@ -28,9 +35,9 @@ START_LINKS = [
 
 DATA_FILE = "data.json"
 
-# =====================
-# DATA
-# =====================
+# =========================
+# DATA SYSTEM
+# =========================
 def load_data():
     try:
         with open(DATA_FILE, "r") as f:
@@ -42,65 +49,79 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f)
 
-# =====================
+# =========================
 # START
-# =====================
+# =========================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
+
     user_id = str(update.message.from_user.id)
     data = load_data()
 
     if user_id not in data:
         data[user_id] = {"balance": 0}
-
-    save_data(data)
+        save_data(data)
 
     link = random.choice(START_LINKS)
 
     await update.message.reply_text(
-        f"💰 ইনকাম করতে নিচের লিংকে চাপ দাও 👇\n\n{link}"
+        f"💰 ইনকাম করতে নিচের লিংকে চাপ দাও 👇\n{link}"
     )
 
-# =====================
+# =========================
 # BALANCE
-# =====================
+# =========================
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
+
     user_id = str(update.message.from_user.id)
     data = load_data()
 
     bal = data.get(user_id, {}).get("balance", 0)
-    await update.message.reply_text(f"💰 Balance: ${bal}")
 
-# =====================
+    await update.message.reply_text(f"💰 তোমার ব্যালেন্স: {bal} টাকা")
+
+# =========================
 # SHORT LINK
-# =====================
+# =========================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
+
     url = update.message.text
 
-    if not url.startswith("http"):
-        await update.message.reply_text("❌ Valid link দাও")
+    if not url or not url.startswith("http"):
+        await update.message.reply_text("❌ সঠিক লিংক দাও")
         return
 
     try:
         api_url = f"https://shrinkearn.com/api?api={API_KEY}&url={url}"
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(api_url) as resp:
+            async with session.get(api_url, timeout=10) as resp:
                 result = await resp.json()
 
-        short_link = result.get("shortenedUrl")
+        # multiple fallback keys
+        short_link = (
+            result.get("shortenedUrl")
+            or result.get("shortened_url")
+            or result.get("short")
+        )
 
         if short_link:
-            await update.message.reply_text(f"🔗 {short_link}")
+            await update.message.reply_text(f"✅ Short Link:\n{short_link}")
         else:
-            await update.message.reply_text("❌ Error from API")
+            await update.message.reply_text("❌ Link convert হয় নাই")
 
     except Exception as e:
         print("ERROR:", e)
-        await update.message.reply_text("⚠️ Server busy, আবার চেষ্টা করো")
+        await update.message.reply_text("⚠️ Error হইছে")
 
-# =====================
+# =========================
 # RUN
-# =====================
+# =========================
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
