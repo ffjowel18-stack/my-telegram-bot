@@ -1,30 +1,22 @@
 import os
 import json
-import time
 import random
 import aiohttp
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = os.getenv("8735885260:AAFT9a1-CZt99IgQ8xuzu_8t2pfYAo8Gp0Y")
+# ✅ ঠিক env variable
+BOT_TOKEN = os.getenv("8735885260:AAG67vhs0DgHEpM57E9CzCa6xiTOY28ZxIQ")
 API_KEY = os.getenv("7040060dda99619908324b34bafcff9f72bde4b4")
 
-ADMIN_ID = "7428574557"
+ADMIN_ID = 7428574557  # int রাখা ভালো
 
 START_LINKS = [
     "https://sepaste.com/eardbbd1",
     "https://sepaste.com/eardbvdbd2",
     "https://sepaste.com/dhdhhd3",
     "https://sepaste.com/dhdhhdhe4",
-    "https://sepaste.com/dhdhhdhe4dvv",
-    "https://sepaste.com/Dbdbxvgddvdv",
-    "https://sepaste.com/Dbdbxvgddvdvbfb",
-    "https://sepaste.com/Dbdbxvgd",
-    "https://sepaste.com/Dbdbxvgddvdvbfbdggd",
-    "https://sepaste.com/Dbdbxvgddvdvbfb",
-    "https://sepaste.com/Dbdbxvgddv78",
-    "https://sepaste.com/Dbdbxvgddv7",
-    "https://sepaste.com/Dbdbxvgddv78cdhsed"
+    "https://sepaste.com/dhdhhdhe4dvv"
 ]
 
 DATA_FILE = "data.json"
@@ -72,7 +64,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"💰 Balance: ${bal}")
 
 # =====================
-# SHORT LINK (ASYNC SAFE)
+# SHORT LINK
 # =====================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
@@ -94,13 +86,17 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"🔗 {short_link}")
         else:
             await update.message.reply_text("❌ Error")
-    except:
+    except Exception as e:
+        print(e)
         await update.message.reply_text("⚠️ Server busy, আবার চেষ্টা করো")
 
 # =====================
 # RUN
 # =====================
-app = ApplicationBuilder().token(TOKEN).build()
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN missing!")
+
+app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("balance", balance))
@@ -108,3 +104,4 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
 print("Bot Running...")
 app.run_polling()
+    
