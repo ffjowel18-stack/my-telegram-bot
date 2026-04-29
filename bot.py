@@ -5,11 +5,18 @@ import aiohttp
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# ✅ ঠিক env variable
+# =====================
+# ENV
+# =====================
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_KEY = os.getenv("API_KEY")
 
-ADMIN_ID = 7428574557  # int রাখা ভালো
+if not BOT_TOKEN:
+    raise ValueError("❌ BOT_TOKEN missing!")
+if not API_KEY:
+    raise ValueError("❌ API_KEY missing!")
+
+ADMIN_ID = 7428574557
 
 START_LINKS = [
     "https://sepaste.com/eardbbd1",
@@ -22,18 +29,23 @@ START_LINKS = [
 DATA_FILE = "data.json"
 
 # =====================
-# DATA SYSTEM
+# SAFE DATA SYSTEM
 # =====================
 def load_data():
+    if not os.path.exists(DATA_FILE):
+        return {}
     try:
-        with open(DATA_FILE) as f:
+        with open(DATA_FILE, "r") as f:
             return json.load(f)
     except:
         return {}
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f)
+    try:
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f)
+    except:
+        pass  # render error avoid
 
 # =====================
 # START
@@ -85,16 +97,16 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if short_link:
             await update.message.reply_text(f"🔗 {short_link}")
         else:
-            await update.message.reply_text("❌ Error")
+            await update.message.reply_text("❌ Link generate হয়নি")
+
     except Exception as e:
-        print(e)
+        print("ERROR:", e)
         await update.message.reply_text("⚠️ Server busy, আবার চেষ্টা করো")
 
 # =====================
 # RUN
 # =====================
-if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN missing!")
+print("✅ Bot Running...")
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -102,6 +114,4 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("balance", balance))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
-print("Bot Running...")
 app.run_polling()
-    
