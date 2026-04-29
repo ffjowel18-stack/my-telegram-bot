@@ -6,8 +6,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 # ✅ ঠিক env variable
-BOT_TOKEN = os.getenv("8735885260:AAG67vhs0DgHEpM57E9CzCa6xiTOY28ZxIQ")
-API_KEY = os.getenv("7040060dda99619908324b34bafcff9f72bde4b4")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+API_KEY = os.getenv("API_KEY")
 
 ADMIN_ID = 7428574557  # int রাখা ভালো
 
