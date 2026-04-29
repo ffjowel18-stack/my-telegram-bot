@@ -12,9 +12,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_KEY = os.getenv("API_KEY")
 
 if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN missing!")
+    raise ValueError("BOT_TOKEN missing!")
 if not API_KEY:
-    raise ValueError("❌ API_KEY missing!")
+    raise ValueError("API_KEY missing!")
 
 ADMIN_ID = 7428574557
 
@@ -29,11 +29,9 @@ START_LINKS = [
 DATA_FILE = "data.json"
 
 # =====================
-# SAFE DATA SYSTEM
+# DATA
 # =====================
 def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
     try:
         with open(DATA_FILE, "r") as f:
             return json.load(f)
@@ -41,11 +39,8 @@ def load_data():
         return {}
 
 def save_data(data):
-    try:
-        with open(DATA_FILE, "w") as f:
-            json.dump(data, f)
-    except:
-        pass  # render error avoid
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f)
 
 # =====================
 # START
@@ -90,14 +85,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as resp:
-                data = await resp.json()
+                result = await resp.json()
 
-        short_link = data.get("shortenedUrl")
+        short_link = result.get("shortenedUrl")
 
         if short_link:
             await update.message.reply_text(f"🔗 {short_link}")
         else:
-            await update.message.reply_text("❌ Link generate হয়নি")
+            await update.message.reply_text("❌ Error from API")
 
     except Exception as e:
         print("ERROR:", e)
@@ -106,12 +101,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =====================
 # RUN
 # =====================
-print("✅ Bot Running...")
-
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("balance", balance))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
+print("Bot Running...")
 app.run_polling()
