@@ -6,7 +6,7 @@ import aiohttp
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-TOKEN = os.getenv("8735885260:AAE90mvgQ2C2GRVAsAz-eq5tT-U8GSKS5xM")
+TOKEN = os.getenv("8735885260:AAFT9a1-CZt99IgQ8xuzu_8t2pfYAo8Gp0Y")
 API_KEY = os.getenv("7040060dda99619908324b34bafcff9f72bde4b4")
 
 ADMIN_ID = "7428574557"
